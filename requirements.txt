@@ -1,5 +1,6 @@
 langchain
 langchain-core
+langchain-groq
 langchain-community
 pypdf
 pymupdf
@@ -7,3 +8,7 @@ ipykernel
 sentence-transformers
 faiss-cpu
 chromadb
+sqlalchemy
+python-dotenv
+scikit-learn
+numpy
