@@ -1,50 +1,37 @@
-import os
-from src.ingestion import load_documents
-from src.text_splitter import split_documents
-from src.embedding_manager import EmbeddingManager
-from src.vector_store import VectorStore
-from src.retriever import RAGRetriever
+# main.py
+from src.embedding_manager import DummyEmbedder
+from src.vector_store import InMemoryVectorStore
+from src.ingestion import ingest_files
+from src.retriever import Retriever
 from src.llm import GroqLLM
-from src.rag_pipeline import rag_simple
-from src.history import QueryHistory
+from src.rag_pipeline import RAGPipeline
 
-def main():
-    # Load documents from data directory
-    data_dir = "./data"
-    print("Loading documents...")
-    documents = load_documents(data_dir)
-    
-    # Split documents into chunks
-    print("Splitting documents...")
-    chunks = split_documents(documents)
-    
-    # Generate embeddings
-    embedding_manager = EmbeddingManager()
-    texts = [doc.page_content for doc in chunks]
-    embeddings = embedding_manager.generate_embeddings(texts)
-    
-    # Initialize vector store and add documents
-    vector_store = VectorStore()
-    vector_store.add_documents(chunks, embeddings)
-    
-    # Initialize retriever and LLM
-    retriever = RAGRetriever(vector_store, embedding_manager)
-    llm = GroqLLM()
-    
-    # Initialize query history
-    history = QueryHistory()
-    
-    # Simple CLI loop for queries
-    print("Ready for queries. Type 'exit' to quit.")
+def build_and_run():
+    # Step 1: Initialize components
+    embedder = DummyEmbedder(dim=64)  # swap later with real embedding model
+    vector_store = InMemoryVectorStore()
+
+    # Step 2: Ingest text files
+    files = [
+        "data/text_files/machine_learning.txt",
+        "data/text_files/python_intro.txt",
+        # TODO: add PDF ingestion later
+    ]
+    ingested = ingest_files(files, embedder, vector_store)
+    print(f"[INFO] Ingested {ingested} chunks")
+
+    # Step 3: Create retriever + LLM
+    retriever = Retriever(vector_store, embedder, top_k=3)
+    llm = GroqLLM(model="llama3-8b-8192")  # ✅ uses Groq API
+    rag = RAGPipeline(retriever, llm)
+
+    # Step 4: Interactive Q&A loop
     while True:
-        query = input("Enter your question: ")
-        if query.lower() in ['exit', 'quit']:
+        q = input("\nEnter your question (or type 'exit' to quit): ")
+        if q.strip().lower() == "exit":
             break
-        answer = rag_simple(query, retriever, llm)
-        print(f"Answer:\n{answer}\n")
-        history.add(query, answer, [])
-    
-    print("Session ended.")
+        ans = rag.answer(q)
+        print("\nAnswer:\n", ans)
 
 if __name__ == "__main__":
-    main()
+    build_and_run()
