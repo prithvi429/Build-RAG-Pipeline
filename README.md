@@ -58,22 +58,7 @@ The pipeline retrieves the most relevant chunks, feeds them to the LLM, and retu
 
 ---
 
-## 📁 Project Structure
 
-```text
-src/
-│   ├── __init__.py
-│   ├── ingestion.py          # Data ingestion & loading (files + DB)
-│   ├── text_splitter.py      # Document chunking
-│   ├── embedding_manager.py  # Embedding generation
-│   ├── vector_store.py       # Vector store management (ChromaDB)
-│   ├── retriever.py          # Retriever class for similarity search
-│   ├── llm.py                # LLM wrapper (Groq LLM)
-│   ├── rag_pipeline.py       # RAG pipeline logic (simple, advanced, streaming)
-│   └── history.py            # User query/response history management
-```
-
----
 
 ## 🤝 Contributing
 
